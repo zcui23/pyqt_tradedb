@@ -2,6 +2,15 @@ import sys
 from PyQt4.QtGui import *
 from PyQt4.QtCore import *
 
+import sqlalchemy
+from sqlalchemy.orm import sessionmaker
+import pyodbc
+import pandas as pd
+import datetime
+
+### External database part
+
+
 
 
 
@@ -67,11 +76,13 @@ class FormWidget(QWidget):
         self.btn.resize(self.btn.sizeHint())
         self.btn.move(220, 300)
         self.btn.setObjectName("submit_data")
-
-
         self.connect(self.btn, SIGNAL("clicked()"), self.submit_btn)
 
 
+### TableView for existing table
+        
+        
+        
         self.layout.addWidget(self.datelabel)
         self.layout.addWidget(self.dateline)
         self.layout.addWidget(self.instrumentlabel)
@@ -104,5 +115,49 @@ class FormWidget(QWidget):
 
         execprice = float(self.priceline.text())
         quantity = int(self.quantityline.text())
+        trade = pd.DataFrame([(exectime, instrument, position, execprice, quantity)])
+        trade.columns = ['Time', 'Instrument', 'Direction', 'ExecutionPrice', 'Quantity']
 
-        print(exectime, instrument, position, execprice, quantity)
+        trade.iloc[0,0] = trade.iloc[0,0].toPyDateTime()
+        trade.iloc[0,3] = float(trade.iloc[0,3])
+        trade.iloc[0,4] = int(trade.iloc[0,4])
+
+     
+        
+        engine = sqlalchemy.create_engine('mssql+pyodbc://sqlserver', echo=True)
+        conn = engine.connect()
+        
+
+
+        try:
+            trade.to_sql('execution', engine, if_exists='append', index=False)
+
+            conn.close()
+            QMessageBox.about(self, 'success','successfully inserted')
+        except Exception:
+            QMessageBox.about(self, 'Error','failed')
+
+
+
+class MyTable(QTableWidget):
+    def __init__(self, data, *args):
+        super(QTableWidget, self).__init__()
+        self.data=result
+        self.setmydata()
+        self.resizeColumnsToContents()
+        self.resizeRowsToContents()
+        
+    
+    def setmydata(self):
+        horHeaders = []
+        for n, key in enumerate(sorted(self.data.keys())):
+            horHeaders.append(key)
+            for m, item in enumerate(self.data[key]):
+                newitem = QTableWidgetItem(item)
+                self.setItem(m, n, newitem)
+        
+        self.setHorizontalHeaderLabels(horHeaders)
+        
+        
+        
+        

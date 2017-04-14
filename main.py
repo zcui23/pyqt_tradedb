@@ -4,9 +4,8 @@ from PyQt4.QtCore import *
 
 from formswindow import FormWidget
 
-'''
-import sqlalchemy
-'''
+
+
 
 
 class Window(QMainWindow):
@@ -15,7 +14,7 @@ class Window(QMainWindow):
         super(Window, self).__init__()
         self.form_widget = FormWidget()
         self.setCentralWidget(self.form_widget)
-
+        self.setWindowTitle('My PyQt App')
 
         quitAction = QAction('&Quit', self)
         quitAction.setShortcut('Ctrl+Q')
@@ -31,16 +30,6 @@ class Window(QMainWindow):
     def quit_app(self):
 
         sys.exit()
-
-
-'''
-metadata = sqlalchemy.MetaData()
-
-engine = sqlalchemy.create_engine('mssql+pyodbc://DESKTOP-G57CRT2/fxtrading')
-con = engine.connect()
-rs = con.execute('select * from FundamentalData')
-'''
-
 
 
 
